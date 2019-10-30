@@ -1,11 +1,45 @@
 {
   "name": "fullstack-osa4-blog-list",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "inspired by https://github.com/microsoft/TypeScript-Node-Starter/blob/master/package.json",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node dist/index.js",
+    "watch-ts": "node_modules/typescript/bin/tsc -w",
+    "watch-node": "nodemon dist/index.js",
+    "test": "echo \"no test specified\" && exit 1",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
+    "build:ui": "rm -rf build && cd ../fullstack/osa2/puhelinluettelo && npm run build --prod && cp -r build ../../../fullstack-osa3-backend",
+    "deploy": "git push heroku master",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push && npm run deploy",
+    "logs:prod": "heroku logs --tail",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.6",
+    "@types/express": "^4.17.1",
+    "@types/mongoose": "^5.5.23",
+    "@types/mongoose-unique-validator": "^1.0.3",
+    "@types/morgan": "^1.7.37",
+    "@types/node": "^12.11.2",
+    "@typescript-eslint/eslint-plugin": "^2.5.0",
+    "concurrently": "^5.0.0",
+    "eslint": "^6.5.1",
+    "eslint-plugin-import": "^2.18.2",
+    "nodemon": "^1.19.4",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "@typescript-eslint/parser": "^2.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.7.6",
+    "mongoose-unique-validator": "^2.0.3",
+    "morgan": "^1.9.1"
+  }
 }
