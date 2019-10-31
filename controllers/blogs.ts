@@ -5,7 +5,7 @@ const blogRouter = Router()
 blogRouter.get('/', async (request, response, next) => {
   try {
     const blogs = await Blog.find({})
-    response.json(blogs)
+    response.json(blogs.map(b => b.toJSON()))
   } catch (error) {
     next(error)
   }
@@ -19,7 +19,7 @@ blogRouter.post('/', async (request, response, next) => {
     return response.status(400).end()
   try {
     const result = await blog.save()
-    response.status(201).json(result)
+    response.status(201).json(result.toJSON())
   } catch (error) {
     next(error)
   }
@@ -40,7 +40,7 @@ blogRouter.put('/:id', async (request, response, next) => {
 
   try {
     const result = await Blog.findByIdAndUpdate(request.params.id, { likes: request.body.likes })
-    response.status(200).json(result)
+    response.status(200).json(result.toJSON())
   } catch (error) {
     next(error)
   }
