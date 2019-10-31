@@ -2,21 +2,23 @@ import { Router } from 'express'
 import Blog from '../models/blog'
 const blogRouter = Router()
 
-blogRouter.get('/', (request, response) => {
-  Blog
-    .find({})
-    .then(blogs => {
-      response.json(blogs)
-    })
+blogRouter.get('/', async (request, response, next) => {
+  try {
+    const blogs = await Blog.find({})
+    response.json(blogs)
+  } catch (error) {
+    next(error)
+  }
 })
 
-blogRouter.post('/', (request, response) => {
+blogRouter.post('/', async (request, response, next) => {
   const blog = new Blog(request.body)
-  blog
-    .save()
-    .then(result => {
-      response.status(201).json(result)
-    })
+  try {
+    const result = await blog.save()
+    response.status(201).json(result)
+  } catch (error) {
+    next(error)
+  }
 })
 
 export default blogRouter
