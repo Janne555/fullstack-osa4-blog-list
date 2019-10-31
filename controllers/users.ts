@@ -5,9 +5,6 @@ import bcrypt from 'bcrypt'
 const userRouter = Router()
 
 userRouter.get('/', async (request, response, next) => {
-  if (!request.body.password || request.body.password.length < 3)
-    return response.status(400).end()
-
   try {
     const users = await User.find({})
     response.json(users.map(u => u.toJSON()))
@@ -17,6 +14,9 @@ userRouter.get('/', async (request, response, next) => {
 })
 
 userRouter.post('/', async (request, response, next) => {
+  if (!request.body.password || request.body.password.length < 3)
+    return response.status(400).send({ error: 'password is too short' })
+
   try {
     const body = request.body
     const saltRounds = 10

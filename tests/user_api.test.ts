@@ -55,10 +55,26 @@ describe('when there is one user in the database', () => {
     expect(usersAtEnd.length).toBe(usersAtStart.length)
   })
 
-
   test('finds all users', async () => {
     const users = await api.get('/api/user')
     expect(users.body.length).toBe(1)
   })
 
+  test('should reject short password', async () => {
+    const response = await api
+      .post('/api/user')
+      .send({ username: 'username', password: 'a' })
+      .expect(400)
+    expect(response.body.error).toContain('password is too short')
+  })
+
+  test('should reject short username', async () => {
+    const response = await api
+      .post('/api/user')
+      .send({ username: 'u', password: 'password is longer' })
+      .expect(400)
+
+    expect(response.body.error).toContain('username')
+    expect(response.body.error).toContain('is shorter than the minimum')
+  })
 })
