@@ -4,6 +4,7 @@ import app from '../app'
 import Blog from '../models/blog'
 import { blogs } from './mocks/blogs'
 import { IBlog } from '../types'
+import { blogsInDb } from './test_helper'
 
 const api = supertest(app)
 
@@ -57,9 +58,9 @@ describe('with some blogs at the start', () => {
       .delete(`/api/blog/${blogs[1]._id}`)
       .expect(204)
 
-    const blogsAtEnd = await api.get('/api/blog')
-    expect(blogsAtEnd.body.length).toBe(blogs.length - 1)
-    expect(blogsAtEnd.body.map((b: IBlog) => b.title)).not.toContain(blogs[1].title)
+    const blogsAtEnd = await blogsInDb()
+    expect(blogsAtEnd.length).toBe(blogs.length - 1)
+    expect(blogsAtEnd.map((b: IBlog) => b.title)).not.toContain(blogs[1].title)
   })
 
   test('deleting with no id results in error', async () => {
@@ -73,8 +74,8 @@ describe('with some blogs at the start', () => {
       .put(`/api/blog/${blogs[0]._id}`)
       .send({ ...blog, likes: 42 })
       .expect(200)
-    const response = await api.get('/api/blog')
-    expect(response.body.find((b: any) => b.id === blogs[0]._id.toString())).toEqual({ ...blog, likes: 42, id: blogs[0]._id.toString() })
+    const response = await blogsInDb()
+    expect(response.find((b: any) => b.id === blogs[0]._id.toString())).toEqual({ ...blog, likes: 42, id: blogs[0]._id.toString() })
   })
 
   test('cant update likes without valid id', async () => {
@@ -95,8 +96,7 @@ describe('with no blogs at the start', () => {
   })
 
   test('adds a blog to the database', async () => {
-    let response = await api.get('/api/blog')
-    expect(response.body.length).toBe(0)
+    const blogsAtStart = await blogsInDb()
 
     await api
       .post('/api/blog')
@@ -104,9 +104,11 @@ describe('with no blogs at the start', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-    response = await api.get('/api/blog')
-    expect(response.body.length).toBe(1)
-    const { author, url, likes, title }: IBlog = response.body[0]
+    const blogsAtEnd = await blogsInDb()
+
+    expect(blogsAtStart.length).toBe(0)
+    expect(blogsAtEnd.length).toBe(1)
+    const { author, url, likes, title }: IBlog = blogsAtEnd[0]
     expect({ author, url, likes, title }).toEqual(blog)
   })
 
@@ -120,8 +122,8 @@ describe('with no blogs at the start', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/)
 
-    let response = await api.get('/api/blog')
-    const { author, url, likes, title }: IBlog = response.body[0]
+    let response = await blogsInDb()
+    const { author, url, likes, title }: IBlog = response[0]
     expect({ author, url, likes, title }).toEqual({ ...blog, likes: 0 })
   })
 
