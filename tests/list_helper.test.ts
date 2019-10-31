@@ -32,3 +32,41 @@ describe('total likes', () => {
     expect(listHelper.totalLikes(blogs)).toBe(36)
   })
 })
+
+
+describe('favourite blog', () => {
+  test('finds favorite blog from a list of blogs', () => {
+    expect(listHelper.favoriteBlog(blogs)).toEqual(new Blog({
+      _id: '5a422b3a1b54a676234d17f9',
+      title: 'Canonical string reduction',
+      author: 'Edsger W. Dijkstra',
+      url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
+      likes: 12,
+      __v: 0
+    }))
+  })
+
+  test('finds nothing from an empty list', () => {
+    expect(listHelper.favoriteBlog([])).toBeUndefined()
+  })
+
+  test('finds one of the favorite blogs in a list with multiple blogs with the same amount of likes', () => {
+    const blog: IBlog = new Blog({
+      _id: 'asdasdasd',
+      title: 'other book',
+      author: 'Edsger W. Dijkstra',
+      url: 'thisisalink',
+      likes: 12,
+      __v: 0
+    })
+
+    expect(listHelper.favoriteBlog([...blogs, blog])).toEqual(new Blog({
+      _id: '5a422b3a1b54a676234d17f9',
+      title: 'Canonical string reduction',
+      author: 'Edsger W. Dijkstra',
+      url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
+      likes: 12,
+      __v: 0
+    }))
+  })
+})
