@@ -1,8 +1,12 @@
 import { Schema, model } from 'mongoose'
 import { IUser } from '../types'
+import uniqueValidator from 'mongoose-unique-validator'
 
 const userSchema = new Schema({
-  username: String,
+  username: {
+    type: String,
+    unique: true
+  },
   name: String,
   passwordHash: String,
   blogs: [
@@ -13,6 +17,8 @@ const userSchema = new Schema({
   ]
 })
 
+userSchema.plugin(uniqueValidator)
+
 userSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
@@ -21,6 +27,6 @@ userSchema.set('toJSON', {
   }
 })
 
-const User = model<IUser>('Blog', userSchema)
+const User = model<IUser>('User', userSchema)
 
 export default User
