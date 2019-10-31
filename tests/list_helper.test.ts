@@ -70,3 +70,32 @@ describe('favourite blog', () => {
     }))
   })
 })
+
+describe('most blogs', () => {
+  test('finds blogger with most blogs', () => {
+    expect(listHelper.mostBlogs(blogs)).toEqual({
+      author: 'Robert C. Martin',
+      blogs: 3
+    })
+  })
+
+  test('finds nothing from an empty list', () => {
+    expect(listHelper.mostBlogs([])).toBeUndefined()
+  })
+
+  test('finds one of the bloggers with most blogs from a list where there are multiple bloggers with the same amount of blogs', () => {
+    const blog = new Blog({
+      _id: '5a422b3a1b54a676234d17f9',
+      title: 'Canonical string reduction',
+      author: 'Edsger W. Dijkstra',
+      url: 'http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html',
+      likes: 12,
+      __v: 0
+    })
+
+    expect(listHelper.mostBlogs([blog, ...blogs])).toEqual({
+      author: 'Edsger W. Dijkstra',
+      blogs: 3
+    })
+  })
+})
