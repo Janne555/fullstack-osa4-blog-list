@@ -1,0 +1,29 @@
+import * as config from './utils/config'
+import express from 'express'
+import mongoose from 'mongoose'
+import cors from 'cors'
+import bodyParser from 'body-parser'
+import blogRouter from './controllers/blogs'
+import morgan from 'morgan'
+import { unknownEndpoint, errorHandler } from './utils/middleware'
+
+const app = express()
+
+console.log('connecting to', config.MONGODB_URI)
+mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
+  .then(() => console.log('connected to MongoDB'))
+  .catch(error => console.error('error connecting to mongoDB:', error.message))
+
+morgan.token('post_body', (req) => {
+  return req.headers['content-type'] && req.headers['content-type'].includes('application/json') ? JSON.stringify(req.body) : ''
+})
+
+app.use(cors())
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :post_body'))
+app.use(express.static('build'))
+app.use(bodyParser.json())
+app.use('/api/blog', blogRouter)
+app.use(unknownEndpoint)
+app.use(errorHandler)
+
+export default app
