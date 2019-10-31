@@ -6,3 +6,10 @@ export interface IBlog extends Document {
   url: string,
   likes: number
 }
+
+export interface IUser extends Document {
+  username: string
+  name: string
+  passwordHash: string
+  blogs: IBlog['_id'][]
+}
