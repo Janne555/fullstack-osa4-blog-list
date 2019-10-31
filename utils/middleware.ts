@@ -17,3 +17,10 @@ export function errorHandler(error: any, request: Request, response: Response, n
 
   next(error)
 }
+
+export function tokenExtractor(request: Request & { token?: string }, response: Response, next: NextFunction) {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer '))
+    request.token = authorization.substring(7)
+  next()
+}

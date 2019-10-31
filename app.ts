@@ -5,7 +5,7 @@ import cors from 'cors'
 import bodyParser from 'body-parser'
 import blogRouter from './controllers/blogs'
 import morgan from 'morgan'
-import { unknownEndpoint, errorHandler } from './utils/middleware'
+import { unknownEndpoint, errorHandler, tokenExtractor } from './utils/middleware'
 import * as logger from './utils/logger'
 import userRouter from './controllers/users'
 import loginRouter from './controllers/login'
@@ -28,6 +28,7 @@ app.use(cors())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :post_body'))
 app.use(express.static('build'))
 app.use(bodyParser.json())
+app.use(tokenExtractor)
 app.use('/api/login', loginRouter)
 app.use('/api/blog', blogRouter)
 app.use('/api/user', userRouter)

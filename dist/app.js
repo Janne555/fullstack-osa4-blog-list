@@ -35,6 +35,7 @@ app.use(cors_1.default());
 app.use(morgan_1.default(':method :url :status :res[content-length] - :response-time ms :post_body'));
 app.use(express_1.default.static('build'));
 app.use(body_parser_1.default.json());
+app.use(middleware_1.tokenExtractor);
 app.use('/api/login', login_1.default);
 app.use('/api/blog', blogs_1.default);
 app.use('/api/user', users_1.default);

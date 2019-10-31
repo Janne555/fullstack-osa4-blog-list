@@ -6,8 +6,17 @@ import { blogs } from './mocks/blogs'
 import { IBlog } from '../types'
 import { blogsInDb } from './test_helper'
 import User from '../models/user'
+import jwt from 'jsonwebtoken'
 
 const api = supertest(app)
+
+const userForToken = {
+  username: 'root',
+  id: '5dbada064be4fe4e8d3471e8'
+}
+
+const token = jwt.sign(userForToken, process.env.SECRET)
+
 
 const blog = {
   title: 'React patterns',
@@ -25,7 +34,7 @@ describe('with blog by a user', () => {
   beforeEach(async () => {
     await User.deleteMany({})
     await Blog.deleteMany({})
-    const user = new User({ username: 'root', password: 'sekret', _id: '5dbad43ccbf4da41f768ed69', notes: ['5dbad43dcbf4da41f768ed6a'] })
+    const user = new User({ username: 'root', passwordHash: '$2b$10$fwFokPZxD19YRiJT.3RZr.sgvKmiqLypQseoKwdrL/vRUPHcSnpUe', _id: '5dbada064be4fe4e8d3471e8', notes: ['5dbad43dcbf4da41f768ed6a'] })
     await user.save()
 
     const blog = new Blog({
@@ -33,7 +42,7 @@ describe('with blog by a user', () => {
       author: 'Michael Chan',
       url: 'https://reactpatterns.com/',
       likes: 7,
-      user: '5dbad43ccbf4da41f768ed69',
+      user: '5dbada064be4fe4e8d3471e8',
       _id: '5dbad43dcbf4da41f768ed6a'
     })
     await blog.save()
@@ -46,8 +55,18 @@ describe('with blog by a user', () => {
     const response = await api.get('/api/blog')
     expect(response.body[0].user.username).toEqual('root')
   })
-})
 
+
+  test('deleting with proper id deletes a blog', async () => {
+    await api
+      .delete('/api/blog/5dbad43dcbf4da41f768ed6a')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204)
+
+    const blogsAtEnd = await blogsInDb()
+    expect(blogsAtEnd.length).toBe(0)
+  })
+})
 
 describe('with some blogs at the start', () => {
   beforeAll(async () => {
@@ -82,19 +101,16 @@ describe('with some blogs at the start', () => {
     expect(response.body[0]).not.toHaveProperty('_id')
   })
 
-  test('deleting with proper id deletes a blog', async () => {
+  test('deleting with proper id deletes a blog but without token results in error', async () => {
     await api
       .delete(`/api/blog/${blogs[1]._id}`)
-      .expect(204)
-
-    const blogsAtEnd = await blogsInDb()
-    expect(blogsAtEnd.length).toBe(blogs.length - 1)
-    expect(blogsAtEnd.map((b: IBlog) => b.title)).not.toContain(blogs[1].title)
+      .expect(401)
   })
 
   test('deleting with no id results in error', async () => {
     await api
       .delete('/api/blog/asd')
+      .set('Authorization', `Bearer ${token}`)
       .expect(400)
   })
 
@@ -118,10 +134,11 @@ describe('with some blogs at the start', () => {
 describe('with no blogs at the start', () => {
   beforeEach(async () => {
     await Blog.deleteMany({})
-  })
-
-  afterEach(async () => {
-    await Blog.deleteMany({})
+    await User.deleteMany({})
+    const otherUser = new User({ username: 'asd', password: 'asdasd' })
+    const user = new User({ username: 'root', passwordHash: '$2b$10$fwFokPZxD19YRiJT.3RZr.sgvKmiqLypQseoKwdrL/vRUPHcSnpUe', _id: '5dbada064be4fe4e8d3471e8' })
+    await user.save()
+    await otherUser.save()
   })
 
   test('adds a blog to the database', async () => {
@@ -129,6 +146,7 @@ describe('with no blogs at the start', () => {
 
     await api
       .post('/api/blog')
+      .set('Authorization', `Bearer ${token}`)
       .send(blog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -147,6 +165,7 @@ describe('with no blogs at the start', () => {
 
     await api
       .post('/api/blog')
+      .set('Authorization', `Bearer ${token}`)
       .send(otherBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -163,8 +182,28 @@ describe('with no blogs at the start', () => {
 
     await api
       .post('/api/blog')
+      .set('Authorization', `Bearer ${token}`)
       .send(otherBlog)
       .expect(400)
   })
+
+  test('should set user from token as owner of blog', async () => {
+    const blogsAtStart = await blogsInDb()
+
+    await api
+      .post('/api/blog')
+      .set('Authorization', `Bearer ${token}`)
+      .send(blog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await blogsInDb()
+
+    expect(blogsAtStart.length).toBe(0)
+    expect(blogsAtEnd.length).toBe(1)
+    const { user }: IBlog = blogsAtEnd[0]
+    expect(user.toString()).toEqual('5dbada064be4fe4e8d3471e8')
+  })
+
 
 })

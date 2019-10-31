@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const blog_1 = __importDefault(require("../models/blog"));
 const user_1 = __importDefault(require("../models/user"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const blogRouter = express_1.Router();
 blogRouter.get('/', (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -26,14 +27,19 @@ blogRouter.get('/', (request, response, next) => __awaiter(void 0, void 0, void 
     }
 }));
 blogRouter.post('/', (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const [user] = yield user_1.default.find({});
+    if (!request.token)
+        return response.status(401).json({ error: 'token missing' });
     const blog = new blog_1.default(request.body);
-    blog.user = user._id;
     if (blog.likes === undefined)
         blog.likes = 0;
     if (!blog.title && !blog.url)
         return response.status(400).end();
     try {
+        const decodedToken = jsonwebtoken_1.default.verify(request.token, process.env.SECRET);
+        if (!('id' in decodedToken))
+            return response.status(401).json({ error: 'token missing' });
+        const user = yield user_1.default.findById(decodedToken.id);
+        blog.user = user._id;
         const result = yield blog.save();
         user.blogs = user.blogs.concat(blog._id);
         yield user.save();
@@ -44,7 +50,17 @@ blogRouter.post('/', (request, response, next) => __awaiter(void 0, void 0, void
     }
 }));
 blogRouter.delete('/:id', (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!request.token)
+        return response.status(401).json({ error: 'token missing' });
     try {
+        const decodedToken = jsonwebtoken_1.default.verify(request.token, process.env.SECRET);
+        if (!('id' in decodedToken))
+            return response.status(401).json({ error: 'token missing' });
+        const user = yield user_1.default.findById(decodedToken.id);
+        const blog = yield blog_1.default.findById(request.params.id);
+        console.log(request.params.id, decodedToken.id, user, blog);
+        if (blog.user.toString() !== user._id.toString())
+            return response.status(401).json({ error: 'not auhtorized' });
         yield blog_1.default.findByIdAndDelete(request.params.id);
         return response.status(204).end();
     }
