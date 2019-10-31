@@ -99,3 +99,33 @@ describe('most blogs', () => {
     })
   })
 })
+
+
+describe('most likes', () => {
+  test('finds blogger with most likes', () => {
+    expect(listHelper.mostLikes(blogs)).toEqual({
+      author: 'Edsger W. Dijkstra',
+      likes: 17
+    })
+  })
+
+  test('finds nothing from an empty list', () => {
+    expect(listHelper.mostLikes([])).toBeUndefined()
+  })
+
+  test('finds one of the bloggers with most likes from a list where there are multiple bloggers with the same amount of likes', () => {
+    const blog = new Blog({
+      _id: '5a422bc61b54a676234d17fc',
+      title: 'Type wars',
+      author: 'Robert C. Martin',
+      url: 'http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html',
+      likes: 5,
+      __v: 0
+    })
+
+    expect(listHelper.mostLikes([blog, ...blogs])).toEqual({
+      author: 'Robert C. Martin',
+      likes: 17
+    })
+  })
+})
