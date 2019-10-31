@@ -61,3 +61,63 @@ describe('with some blogs at the start', () => {
       .expect(400)
   })
 })
+
+describe('with no blogs at the start', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+  })
+
+  afterEach(async () => {
+    await Blog.deleteMany({})
+  })
+
+  const blog = {
+    title: 'React patterns',
+    author: 'Michael Chan',
+    url: 'https://reactpatterns.com/',
+    likes: 7,
+  }
+
+  test('adds a blog to the database', async () => {
+    let response = await api.get('/api/blog')
+    expect(response.body.length).toBe(0)
+
+    await api
+      .post('/api/blog')
+      .send(blog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    response = await api.get('/api/blog')
+    expect(response.body.length).toBe(1)
+    const { author, url, likes, title }: IBlog = response.body[0]
+    expect({ author, url, likes, title }).toEqual(blog)
+  })
+
+  test('adds like: 0 if it is not defined', async () => {
+    const otherBlog = { ...blog }
+    delete otherBlog.likes
+
+    await api
+      .post('/api/blog')
+      .send(otherBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    let response = await api.get('/api/blog')
+    const { author, url, likes, title }: IBlog = response.body[0]
+    expect({ author, url, likes, title }).toEqual({ ...blog, likes: 0 })
+  })
+
+  test('a blog missing title and url results in 400', async () => {
+    const otherBlog = { ...blog }
+    delete otherBlog.url
+    delete otherBlog.title
+
+    await api
+      .post('/api/blog')
+      .send(otherBlog)
+      .expect(400)
+  })
+
+})
