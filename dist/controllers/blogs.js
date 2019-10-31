@@ -28,6 +28,8 @@ blogRouter.post('/', (request, response, next) => __awaiter(void 0, void 0, void
     const blog = new blog_1.default(request.body);
     if (blog.likes === undefined)
         blog.likes = 0;
+    if (!blog.title && !blog.url)
+        return response.status(400).end();
     try {
         const result = yield blog.save();
         response.status(201).json(result);
