@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose'
+import { IBlog } from '../types'
 
 const blogSchema = new Schema({
   title: String,
@@ -7,6 +8,6 @@ const blogSchema = new Schema({
   likes: Number
 })
 
-const Blog = model('Blog', blogSchema)
+const Blog = model<IBlog>('Blog', blogSchema)
 
 export default Blog
