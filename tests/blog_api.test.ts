@@ -5,6 +5,7 @@ import Blog from '../models/blog'
 import { blogs } from './mocks/blogs'
 import { IBlog } from '../types'
 import { blogsInDb } from './test_helper'
+import User from '../models/user'
 
 const api = supertest(app)
 
@@ -19,6 +20,34 @@ afterAll(async () => {
   await Blog.deleteMany({})
   mongoose.connection.close()
 })
+
+describe('with blog by a user', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+    await Blog.deleteMany({})
+    const user = new User({ username: 'root', password: 'sekret', _id: '5dbad43ccbf4da41f768ed69', notes: ['5dbad43dcbf4da41f768ed6a'] })
+    await user.save()
+
+    const blog = new Blog({
+      title: 'React patterns',
+      author: 'Michael Chan',
+      url: 'https://reactpatterns.com/',
+      likes: 7,
+      user: '5dbad43ccbf4da41f768ed69',
+      _id: '5dbad43dcbf4da41f768ed6a'
+    })
+    await blog.save()
+
+    user.blogs = user.blogs.concat(blog)
+    await user.save()
+  })
+
+  test('should return blog with user', async () => {
+    const response = await api.get('/api/blog')
+    expect(response.body[0].user.username).toEqual('root')
+  })
+})
+
 
 describe('with some blogs at the start', () => {
   beforeAll(async () => {

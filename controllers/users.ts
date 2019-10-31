@@ -6,7 +6,7 @@ const userRouter = Router()
 
 userRouter.get('/', async (request, response, next) => {
   try {
-    const users = await User.find({})
+    const users = await User.find({}).populate('blogs')
     response.json(users.map(u => u.toJSON()))
   } catch (error) {
     next(error)

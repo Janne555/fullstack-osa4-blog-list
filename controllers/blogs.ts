@@ -1,10 +1,11 @@
 import { Router } from 'express'
 import Blog from '../models/blog'
+import User from '../models/user'
 const blogRouter = Router()
 
 blogRouter.get('/', async (request, response, next) => {
   try {
-    const blogs = await Blog.find({})
+    const blogs = await Blog.find({}).populate('user')
     response.json(blogs.map(b => b.toJSON()))
   } catch (error) {
     next(error)
@@ -12,13 +13,18 @@ blogRouter.get('/', async (request, response, next) => {
 })
 
 blogRouter.post('/', async (request, response, next) => {
+  const [user] = await User.find({})
   const blog = new Blog(request.body)
+  blog.user = user._id
+
   if (blog.likes === undefined)
     blog.likes = 0
   if (!blog.title && !blog.url)
     return response.status(400).end()
   try {
     const result = await blog.save()
+    user.blogs = user.blogs.concat(blog._id)
+    await user.save()
     response.status(201).json(result.toJSON())
   } catch (error) {
     next(error)

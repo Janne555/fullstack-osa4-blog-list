@@ -2,8 +2,14 @@ import User from '../models/user'
 import { usersInDb } from './test_helper'
 import supertest from 'supertest'
 import app from '../app'
+import mongoose from 'mongoose'
+import Blog from '../models/blog'
 
 const api = supertest(app)
+
+afterAll(() => {
+  mongoose.connection.close()
+})
 
 describe('when there is one user in the database', () => {
   beforeEach(async () => {
@@ -78,3 +84,32 @@ describe('when there is one user in the database', () => {
     expect(response.body.error).toContain('is shorter than the minimum')
   })
 })
+
+describe('when the database has a user with blogs', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+    await Blog.deleteMany({})
+    const user = new User({ username: 'root', password: 'sekret', _id: '5dbad43ccbf4da41f768ed69', notes: ['5dbad43dcbf4da41f768ed6a'] })
+    await user.save()
+
+    const blog = new Blog({
+      title: 'React patterns',
+      author: 'Michael Chan',
+      url: 'https://reactpatterns.com/',
+      likes: 7,
+      user: '5dbad43ccbf4da41f768ed69',
+      _id: '5dbad43dcbf4da41f768ed6a'
+    })
+    await blog.save()
+
+    user.blogs = user.blogs.concat(blog)
+    await user.save()
+  })
+
+  test('should return user with blogs', async () => {
+    const response = await api.get('/api/user')
+    expect(response.body).toContainEqual({ 'blogs': [{ 'author': 'Michael Chan', 'id': '5dbad43dcbf4da41f768ed6a', 'likes': 7, 'title': 'React patterns', 'url': 'https://reactpatterns.com/', 'user': '5dbad43ccbf4da41f768ed69' }], 'id': '5dbad43ccbf4da41f768ed69', 'username': 'root' })
+  })
+
+})
+
