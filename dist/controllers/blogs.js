@@ -14,25 +14,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const blog_1 = __importDefault(require("../models/blog"));
+const user_1 = __importDefault(require("../models/user"));
 const blogRouter = express_1.Router();
 blogRouter.get('/', (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const blogs = yield blog_1.default.find({});
-        response.json(blogs);
+        const blogs = yield blog_1.default.find({}).populate('user');
+        response.json(blogs.map(b => b.toJSON()));
     }
     catch (error) {
         next(error);
     }
 }));
 blogRouter.post('/', (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const [user] = yield user_1.default.find({});
     const blog = new blog_1.default(request.body);
+    blog.user = user._id;
     if (blog.likes === undefined)
         blog.likes = 0;
     if (!blog.title && !blog.url)
         return response.status(400).end();
     try {
         const result = yield blog.save();
-        response.status(201).json(result);
+        user.blogs = user.blogs.concat(blog._id);
+        yield user.save();
+        response.status(201).json(result.toJSON());
     }
     catch (error) {
         next(error);
@@ -52,7 +57,7 @@ blogRouter.put('/:id', (request, response, next) => __awaiter(void 0, void 0, vo
         return response.status(400).send();
     try {
         const result = yield blog_1.default.findByIdAndUpdate(request.params.id, { likes: request.body.likes });
-        response.status(200).json(result);
+        response.status(200).json(result.toJSON());
     }
     catch (error) {
         next(error);
