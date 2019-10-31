@@ -7,6 +7,7 @@ import blogRouter from './controllers/blogs'
 import morgan from 'morgan'
 import { unknownEndpoint, errorHandler } from './utils/middleware'
 import * as logger from './utils/logger'
+import userRouter from './controllers/users'
 
 const app = express()
 
@@ -27,6 +28,7 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :p
 app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use('/api/blog', blogRouter)
+app.use('/api/user', userRouter)
 app.use(unknownEndpoint)
 app.use(errorHandler)
 
