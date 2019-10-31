@@ -38,5 +38,25 @@ blogRouter.post('/', (request, response, next) => __awaiter(void 0, void 0, void
         next(error);
     }
 }));
+blogRouter.delete('/:id', (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield blog_1.default.findByIdAndDelete(request.params.id);
+        return response.status(204).end();
+    }
+    catch (error) {
+        next(error);
+    }
+}));
+blogRouter.put('/:id', (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!request.body.likes)
+        return response.status(400).send();
+    try {
+        const result = yield blog_1.default.findByIdAndUpdate(request.params.id, { likes: request.body.likes });
+        response.status(200).json(result);
+    }
+    catch (error) {
+        next(error);
+    }
+}));
 exports.default = blogRouter;
 //# sourceMappingURL=blogs.js.map

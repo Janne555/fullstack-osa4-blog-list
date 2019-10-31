@@ -21,6 +21,7 @@ const middleware_1 = require("./utils/middleware");
 const logger = __importStar(require("./utils/logger"));
 const app = express_1.default();
 logger.info('connecting to', config.MONGODB_URI);
+mongoose_1.default.set('useFindAndModify', false);
 mongoose_1.default.connect(config.MONGODB_URI, { useNewUrlParser: true })
     .then(() => logger.info('connected to MongoDB'))
     .catch(error => logger.error('error connecting to mongoDB:', error.message));
@@ -28,8 +29,8 @@ morgan_1.default.token('post_body', (req) => {
     return req.headers['content-type'] && req.headers['content-type'].includes('application/json') ? JSON.stringify(req.body) : '';
 });
 app.use(cors_1.default());
-if (process.env.NODE_ENV !== 'test')
-    app.use(morgan_1.default(':method :url :status :res[content-length] - :response-time ms :post_body'));
+// if (process.env.NODE_ENV !== 'test')
+app.use(morgan_1.default(':method :url :status :res[content-length] - :response-time ms :post_body'));
 app.use(express_1.default.static('build'));
 app.use(body_parser_1.default.json());
 app.use('/api/blog', blogs_1.default);

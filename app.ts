@@ -11,6 +11,8 @@ import * as logger from './utils/logger'
 const app = express()
 
 logger.info('connecting to', config.MONGODB_URI)
+
+mongoose.set('useFindAndModify', false)
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
   .then(() => logger.info('connected to MongoDB'))
   .catch(error => logger.error('error connecting to mongoDB:', error.message))

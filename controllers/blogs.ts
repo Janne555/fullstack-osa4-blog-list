@@ -34,4 +34,16 @@ blogRouter.delete('/:id', async (request, response, next) => {
   }
 })
 
+blogRouter.put('/:id', async (request, response, next) => {
+  if (!request.body.likes)
+    return response.status(400).send()
+
+  try {
+    const result = await Blog.findByIdAndUpdate(request.params.id, { likes: request.body.likes })
+    response.status(200).json(result)
+  } catch (error) {
+    next(error)
+  }
+})
+
 export default blogRouter

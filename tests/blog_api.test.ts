@@ -7,6 +7,13 @@ import { IBlog } from '../types'
 
 const api = supertest(app)
 
+const blog = {
+  title: 'React patterns',
+  author: 'Michael Chan',
+  url: 'https://reactpatterns.com/',
+  likes: 7,
+}
+
 afterAll(async () => {
   await Blog.deleteMany({})
   mongoose.connection.close()
@@ -45,19 +52,35 @@ describe('with some blogs at the start', () => {
     expect(response.body[0]).not.toHaveProperty('_id')
   })
 
-  test('with proper id deletes a blog', async () => {
+  test('deleting with proper id deletes a blog', async () => {
     await api
-      .delete(`/api/blog/${blogs[0]._id}`)
+      .delete(`/api/blog/${blogs[1]._id}`)
       .expect(204)
 
     const blogsAtEnd = await api.get('/api/blog')
     expect(blogsAtEnd.body.length).toBe(blogs.length - 1)
-    expect(blogsAtEnd.body.map((b: IBlog) => b.title)).not.toContain(blogs[0].title)
+    expect(blogsAtEnd.body.map((b: IBlog) => b.title)).not.toContain(blogs[1].title)
   })
 
-  test('with no id results in error', async () => {
+  test('deleting with no id results in error', async () => {
     await api
       .delete('/api/blog/asd')
+      .expect(400)
+  })
+
+  test('can update likes with valid id', async () => {
+    await api
+      .put(`/api/blog/${blogs[0]._id}`)
+      .send({ ...blog, likes: 42 })
+      .expect(200)
+    const response = await api.get('/api/blog')
+    expect(response.body.find((b: any) => b.id === blogs[0]._id.toString())).toEqual({ ...blog, likes: 42, id: blogs[0]._id.toString() })
+  })
+
+  test('cant update likes without valid id', async () => {
+    await api
+      .put('/api/blog/asd')
+      .send({ likes: 42 })
       .expect(400)
   })
 })
@@ -70,13 +93,6 @@ describe('with no blogs at the start', () => {
   afterEach(async () => {
     await Blog.deleteMany({})
   })
-
-  const blog = {
-    title: 'React patterns',
-    author: 'Michael Chan',
-    url: 'https://reactpatterns.com/',
-    likes: 7,
-  }
 
   test('adds a blog to the database', async () => {
     let response = await api.get('/api/blog')
