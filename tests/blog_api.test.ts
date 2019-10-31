@@ -92,4 +92,16 @@ describe('POST /api/blog', () => {
     const { author, url, likes, title }: IBlog = response.body[0]
     expect({ author, url, likes, title }).toEqual({ ...blog, likes: 0 })
   })
+
+  test('a blog missing title and url results in 400', async () => {
+    const otherBlog = { ...blog }
+    delete otherBlog.url
+    delete otherBlog.title
+
+    await api
+      .post('/api/blog')
+      .send(otherBlog)
+      .expect(400)
+  })
+
 })
