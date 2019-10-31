@@ -20,8 +20,8 @@ morgan.token('post_body', (req) => {
 })
 
 app.use(cors())
-if (process.env.NODE_ENV !== 'test')
-  app.use(morgan(':method :url :status :res[content-length] - :response-time ms :post_body'))
+// if (process.env.NODE_ENV !== 'test')
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :post_body'))
 app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use('/api/blog', blogRouter)

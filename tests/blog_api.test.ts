@@ -12,7 +12,7 @@ afterAll(async () => {
   mongoose.connection.close()
 })
 
-describe('GET /api/blog', () => {
+describe('with some blogs at the start', () => {
   beforeAll(async () => {
     await Blog.deleteMany({})
     await Promise.all(blogs.map(blog => blog.save()))
@@ -44,64 +44,20 @@ describe('GET /api/blog', () => {
     expect(response.body[0]).toHaveProperty('id')
     expect(response.body[0]).not.toHaveProperty('_id')
   })
-})
 
-describe('POST /api/blog', () => {
-  beforeEach(async () => {
-    await Blog.deleteMany({})
-  })
-
-  afterEach(async () => {
-    await Blog.deleteMany({})
-  })
-
-  const blog = {
-    title: 'React patterns',
-    author: 'Michael Chan',
-    url: 'https://reactpatterns.com/',
-    likes: 7,
-  }
-
-  test('adds a blog to the database', async () => {
-    let response = await api.get('/api/blog')
-    expect(response.body.length).toBe(0)
-
+  test('with proper id deletes a blog', async () => {
     await api
-      .post('/api/blog')
-      .send(blog)
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
+      .delete(`/api/blog/${blogs[0]._id}`)
+      .expect(204)
 
-    response = await api.get('/api/blog')
-    expect(response.body.length).toBe(1)
-    const { author, url, likes, title }: IBlog = response.body[0]
-    expect({ author, url, likes, title }).toEqual(blog)
+    const blogsAtEnd = await api.get('/api/blog')
+    expect(blogsAtEnd.body.length).toBe(blogs.length - 1)
+    expect(blogsAtEnd.body.map((b: IBlog) => b.title)).not.toContain(blogs[0].title)
   })
 
-  test('adds like: 0 if it is not defined', async () => {
-    const otherBlog = { ...blog }
-    delete otherBlog.likes
-
+  test('with no id results in error', async () => {
     await api
-      .post('/api/blog')
-      .send(otherBlog)
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
-
-    let response = await api.get('/api/blog')
-    const { author, url, likes, title }: IBlog = response.body[0]
-    expect({ author, url, likes, title }).toEqual({ ...blog, likes: 0 })
-  })
-
-  test('a blog missing title and url results in 400', async () => {
-    const otherBlog = { ...blog }
-    delete otherBlog.url
-    delete otherBlog.title
-
-    await api
-      .post('/api/blog')
-      .send(otherBlog)
+      .delete('/api/blog/asd')
       .expect(400)
   })
-
 })
