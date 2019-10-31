@@ -4,8 +4,8 @@ module.exports = {
         "node": true
     },
     "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended"
+        "plugin:@typescript-eslint/eslint-recommended",
+        "eslint:recommended"
     ],
     "globals": {
         "Atomics": "readonly",
@@ -37,6 +37,7 @@ module.exports = {
             "never"
         ],
         "eqeqeq": "error",
-        "no-console": 0
+        "no-console": 0,
+        "no-unused-vars": "off"
     }
 }

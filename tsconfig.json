@@ -7,9 +7,6 @@
     "esModuleInterop": true,
     "noImplicitAny": true
   },
-  "include": [
-    "src"
-  ],
   "exclude": [
     "node_modules",
     ".vscode"
