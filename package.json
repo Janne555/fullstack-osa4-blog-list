@@ -7,14 +7,14 @@
     "start": "node dist/index.js",
     "watch-ts": "node_modules/typescript/bin/tsc -w",
     "watch-node": "nodemon dist/index.js",
-    "test": "echo \"no test specified\" && exit 1",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
     "build:ui": "rm -rf build && cd ../fullstack/osa2/puhelinluettelo && npm run build --prod && cp -r build ../../../fullstack-osa3-backend",
     "deploy": "git push heroku master",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push && npm run deploy",
     "logs:prod": "heroku logs --tail",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "test": "jest --verbose"
   },
   "author": "",
   "license": "ISC",
@@ -29,6 +29,7 @@
     "concurrently": "^5.0.0",
     "eslint": "^6.5.1",
     "eslint-plugin-import": "^2.18.2",
+    "jest": "^24.9.0",
     "nodemon": "^1.19.4",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
@@ -41,5 +42,8 @@
     "mongoose": "^5.7.6",
     "mongoose-unique-validator": "^2.0.3",
     "morgan": "^1.9.1"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
