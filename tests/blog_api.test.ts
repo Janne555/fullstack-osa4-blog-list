@@ -77,4 +77,19 @@ describe('POST /api/blog', () => {
     const { author, url, likes, title }: IBlog = response.body[0]
     expect({ author, url, likes, title }).toEqual(blog)
   })
+
+  test('adds like: 0 if it is not defined', async () => {
+    const otherBlog = { ...blog }
+    delete otherBlog.likes
+
+    await api
+      .post('/api/blog')
+      .send(otherBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    let response = await api.get('/api/blog')
+    const { author, url, likes, title }: IBlog = response.body[0]
+    expect({ author, url, likes, title }).toEqual({ ...blog, likes: 0 })
+  })
 })
