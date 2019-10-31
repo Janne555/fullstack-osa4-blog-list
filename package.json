@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.1",
     "@types/jest": "^24.0.21",
@@ -42,6 +43,7 @@
   "dependencies": {
     "@types/supertest": "^2.0.8",
     "@typescript-eslint/parser": "^2.5.0",
+    "bcrypt": "^3.0.6",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
