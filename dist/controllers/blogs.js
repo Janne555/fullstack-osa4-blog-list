@@ -26,6 +26,8 @@ blogRouter.get('/', (request, response, next) => __awaiter(void 0, void 0, void 
 }));
 blogRouter.post('/', (request, response, next) => __awaiter(void 0, void 0, void 0, function* () {
     const blog = new blog_1.default(request.body);
+    if (blog.likes === undefined)
+        blog.likes = 0;
     try {
         const result = yield blog.save();
         response.status(201).json(result);
