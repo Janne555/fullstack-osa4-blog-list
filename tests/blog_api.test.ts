@@ -33,8 +33,12 @@ describe('/api/blog', () => {
   test('a specific blog is within returned blogs', async () => {
     const response = await api.get('/api/blog')
     expect(response.body.map((blog: IBlog) => blog.url)).toContainEqual(blogs[0].url)
+  }) 
+
+  test('id field shoud be correct', async () => {
+    const response = await api.get('/api/blog')
+    expect(response.body[0]).toHaveProperty('id')
+    expect(response.body[0]).not.toHaveProperty('_id')
   })
   
 })
-
-
